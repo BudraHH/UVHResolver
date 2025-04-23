@@ -14,6 +14,6 @@ public class AppConfig extends ResourceConfig {
                 "com.budra.uvh.model.repository",         // Where LskCounterRepository (@ApplicationScoped) is
                 "com.budra.uvh.exception"                 // Scan for potential ExceptionMappers later if needed
         );
-        System.out.println("JAX-RS Application Initialized - Scanning relevant packages.");
+        System.out.println("JAX-RS (Jersey) Application Initialized - Scanning relevant packages.");
     }
 }
