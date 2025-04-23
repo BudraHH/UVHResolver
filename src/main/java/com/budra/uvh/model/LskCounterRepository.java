@@ -1,8 +1,7 @@
-package com.budra.uvh.model;
+package com.budra.uvh.model; // Correct package
 
-// Correct import for ConnectionManager based on your structure
-// Import standard Jakarta EE annotations for DI and scope
-import jakarta.enterprise.context.ApplicationScoped;
+// Removed jakarta.enterprise.context.ApplicationScoped import
+
 // Import your custom exception
 import com.budra.uvh.exception.LskGenerationException;
 
@@ -11,19 +10,19 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
-// --- FIX: Add Scope Annotation ---
-@ApplicationScoped // Repositories are often singletons (one instance for the app)
+// NO @ApplicationScoped annotation - Lifecycle managed manually (as a singleton in the factory)
 public class LskCounterRepository {
     private static final Logger log = LoggerFactory.getLogger(LskCounterRepository.class);
 
-    // Using the simpler, more portable SELECT FOR UPDATE approach
+    // SQL Constants remain the same
     private static final String SELECT_FOR_UPDATE_SQL = "SELECT last_assigned_value FROM LogicalSeedKeyCounters WHERE table_name = ? AND column_name = ? FOR UPDATE";
     private static final String UPDATE_SQL = "UPDATE LogicalSeedKeyCounters SET last_assigned_value = ?, last_updated = CURRENT_TIMESTAMP WHERE table_name = ? AND column_name = ?";
     private static final String INSERT_SQL = "INSERT INTO LogicalSeedKeyCounters (table_name, column_name, last_assigned_value) VALUES (?, ?, ?)";
 
-    // --- FIX: Add Default Constructor (often needed for DI/proxies) ---
+    // Keep public no-arg constructor - This is how the factory will create the singleton instance
     public LskCounterRepository() {
-        log.debug("LskCounterRepository instance created by DI container.");
+        // Updated log message for clarity
+        log.debug("LskCounterRepository instance MANUALLY created.");
     }
 
 
@@ -43,22 +42,22 @@ public class LskCounterRepository {
      * @throws LskGenerationException If the update/insert fails unexpectedly after locking.
      * @throws IllegalArgumentException If count is not positive or names are invalid.
      */
-    // --- FIX: Renamed method back and added throws clause ---
+    // Method signature and body remain exactly the same
     public long getAndReserveNextValueBlock(Connection conn, String tableName, String columnName, int count)
             throws SQLException, LskGenerationException, IllegalArgumentException {
 
         // --- Input Validation ---
         if (count <= 0) {
             log.warn("Invalid count requested for LSK generation: {}", count);
-            throw new IllegalArgumentException("Count must be positive."); // Throw exception
+            throw new IllegalArgumentException("Count must be positive.");
         }
         if (tableName == null || tableName.trim().isEmpty()) {
-            log.warn("Table name is null/empty for LSK generation.");
-            throw new IllegalArgumentException("Table name cannot be null or empty."); // Throw exception
+            log.warn("Table name is null/empty for Lsk generation.");
+            throw new IllegalArgumentException("Table name cannot be null or empty.");
         }
         if (columnName == null || columnName.trim().isEmpty()) {
-            log.warn("Column name is null/empty for LSK generation.");
-            throw new IllegalArgumentException("Column name cannot be null or empty."); // Throw exception
+            log.warn("Column name is null/empty for Lsk generation.");
+            throw new IllegalArgumentException("Column name cannot be null or empty.");
         }
 
         long currentMaxValue = -1;
@@ -83,7 +82,7 @@ public class LskCounterRepository {
 
         // --- 2. Calculate New Range ---
         long nextValue = currentMaxValue + 1;
-        long endValue = nextValue + count - 1; // Correct calculation for block end
+        long endValue = nextValue + count - 1;
 
         // --- 3. Update or Insert Counter ---
         int rowsAffected;
@@ -108,7 +107,6 @@ public class LskCounterRepository {
         // --- 4. Verification ---
         if (rowsAffected != 1) {
             log.error("Critical error: Failed to update or insert counter row for {}:{} after acquiring lock! Rows affected: {}. Transaction will be rolled back.", tableName, columnName, rowsAffected);
-            // --- FIX: Throw exception ---
             throw new LskGenerationException("Failed to update/insert counter row for " + tableName + ":" + columnName + ". Concurrency issue or DB error?");
         }
 

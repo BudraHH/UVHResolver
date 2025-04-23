@@ -20,45 +20,55 @@ public class ConnectionManager {
     // Static initializer block: runs once when the class is loaded
     static {
         log.info("Initializing HikariCP connection pool...");
+        Properties props = null; // Initialize to null
+        HikariConfig config = null; // Initialize to null
         try {
-            Properties props = loadProperties();
-            HikariConfig config = new HikariConfig();
+            props = loadProperties();
+            config = new HikariConfig();
+
+            // --- Log the exact values being used ---
+            String dbUrl = props.getProperty("db.url", "jdbc:postgresql://localhost:5432/postgres");
+            String dbUser = props.getProperty("db.user", "postgres");
+            // Avoid logging password in production logs if possible, but useful for debugging:
+            String dbPassword = props.getProperty("db.password", "1234");
+            String dbDriver = props.getProperty("db.driver", "org.postgresql.Driver");
+            log.info("Attempting to configure HikariCP with:");
+            log.info("  db.url = {}", dbUrl);
+            log.info("  db.user = {}", dbUser);
+            // log.info("  db.password = <HIDDEN>"); // Better for production
+            log.info("  db.password = {}", dbPassword); // Use for local debugging only
+            log.info("  db.driver = {}", dbDriver);
+            // --- End logging ---
 
             // Configure HikariCP from properties
-            config.setJdbcUrl(props.getProperty("db.url", "jdbc:postgresql://localhost:5432/postgres")); // Default for safety
-            config.setUsername(props.getProperty("db.user", "postgres"));
-            config.setPassword(props.getProperty("db.password", "1234"));
-            config.setDriverClassName(props.getProperty("db.driver", "org.postgresql.Driver")); // Optional if driver is JDBC 4+ compliant and on classpath
+            config.setJdbcUrl(dbUrl);
+            config.setUsername(dbUser);
+            config.setPassword(dbPassword);
+            config.setDriverClassName(dbDriver);
 
-            // --- Pooling settings ---
-            // Use Integer.parseInt and provide defaults
+            // Pooling settings (keep the parsing)
             config.setMaximumPoolSize(Integer.parseInt(props.getProperty("db.pool.maxSize", "10")));
             config.setMinimumIdle(Integer.parseInt(props.getProperty("db.pool.minIdle", "2")));
-            // Use Long.parseLong and provide defaults
-            config.setIdleTimeout(Long.parseLong(props.getProperty("db.pool.idleTimeout", "600000"))); // 10 minutes
-            config.setConnectionTimeout(Long.parseLong(props.getProperty("db.pool.connectionTimeout", "30000"))); // 30 seconds
-            config.setMaxLifetime(Long.parseLong(props.getProperty("db.pool.maxLifetime", "1800000"))); // 30 minutes
+            config.setIdleTimeout(Long.parseLong(props.getProperty("db.pool.idleTimeout", "600000")));
+            config.setConnectionTimeout(Long.parseLong(props.getProperty("db.pool.connectionTimeout", "30000")));
+            config.setMaxLifetime(Long.parseLong(props.getProperty("db.pool.maxLifetime", "1800000")));
+            config.setAutoCommit(Boolean.parseBoolean(props.getProperty("db.pool.autoCommit", "true")));
 
-            // Add other recommended settings if needed
-            // config.addDataSourceProperty("cachePrepStmts", "true");
-            // config.addDataSourceProperty("prepStmtCacheSize", "250");
-            // config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-            config.setAutoCommit(Boolean.parseBoolean(props.getProperty("db.pool.autoCommit", "true"))); // Default usually true
-
-
-            // #############################################################
-            // ##          CORRECTION: Create the DataSource!           ##
-            // #############################################################
-            dataSource = new HikariDataSource(config);
-            // #############################################################
-
+            log.info("HikariConfig object created. Attempting to initialize HikariDataSource...");
+            dataSource = new HikariDataSource(config); // <<< Point of potential failure
             log.info("HikariCP DataSource initialized successfully for JDBC URL: {}", config.getJdbcUrl());
 
         } catch (Exception e) {
-            // Catch broader exceptions during initialization
+            // Log the full stack trace of the exception 'e'
             log.error("!!! CRITICAL: Failed to initialize HikariCP DataSource !!!", e);
-            // Depending on application needs, you might want to prevent startup
-            // For now, dataSource will remain null, causing errors on getConnection()
+            // Optionally log config again if helpful
+            if (config != null) {
+                log.error("Failed configuration details: URL={}, User={}, Driver={}", config.getJdbcUrl(), config.getUsername(), config.getDriverClassName());
+            } else if (props != null) {
+                log.error("Failed configuration properties: {}", props);
+            } else {
+                log.error("Properties could not be loaded.");
+            }
         }
     }
 
@@ -69,7 +79,7 @@ public class ConnectionManager {
             if (input == null) {
                 log.warn("!!! {} not found on classpath. Using hardcoded defaults (NOT recommended for production).", CONFIG_FILE);
                 // Set some basic defaults if file not found
-                props.setProperty("db.url", "jdbc:postgresql://localhost:5432/uvh_resolver_db"); // Example DB name
+                props.setProperty("db.url", "jdbc:postgresql://localhost:5432/postgres"); // Example DB name
                 props.setProperty("db.user", "postgres"); // Corrected property name
                 props.setProperty("db.password", "1234"); // Corrected property name
                 props.setProperty("db.driver", "org.postgresql.Driver");
@@ -81,7 +91,7 @@ public class ConnectionManager {
         } catch (IOException e) {
             log.error("!!! Error loading database configuration file: {}. Using defaults.", CONFIG_FILE, e);
             // Set defaults on error too
-            props.setProperty("db.url", "jdbc:postgresql://localhost:5432/uvh_resolver_db");
+            props.setProperty("db.url", "jdbc:postgresql://localhost:5432/postgres");
             props.setProperty("db.user", "postgres"); // Corrected property name
             props.setProperty("db.password", "1234"); // Corrected property name
             props.setProperty("db.driver", "org.postgresql.Driver");
