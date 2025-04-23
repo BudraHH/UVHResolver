@@ -1,10 +1,8 @@
-package com.budra.uvh.controllers.service;
+package com.budra.uvh.service;
 
 import com.budra.uvh.dbConfig.ConnectionManager;
+import com.budra.uvh.model.LskCounterRepository;
 import com.budra.uvh.exception.PlaceholderFormatException;
-import com.budra.uvh.model.repository.LskCounterRepository;
-//import com.budra.uvh.controller.exception.LskGenerationException
-//import com.budra.uvh.controller.exception.PlaceHolderFormatException
 import com.budra.uvh.utils.PlaceHolderInfo;
 import com.budra.uvh.utils.XmlUtils;
 

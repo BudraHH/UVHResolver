@@ -1,7 +1,7 @@
-package com.budra.uvh.controllers.requestHandler;
+package com.budra.uvh.controllers;
 
 // Correct import for your service class (assuming it's now LskResolutionService)
-import com.budra.uvh.controllers.service.LskResolution; // USE THE CORRECT CLASS NAME
+import com.budra.uvh.service.LskResolution; // USE THE CORRECT CLASS NAME
 
 // Import standard Jakarta EE annotations for DI and scope
 import jakarta.enterprise.context.RequestScoped;

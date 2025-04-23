@@ -11,7 +11,7 @@
   <packaging>war</packaging> <!-- Package as a Web Application Archive -->
 
   <name>UVHResolver</name>
-<!--  <url>http://zoho.com</url> -->
+  <!--  <url>http://zoho.com</url> -->
 
   <!-- Dependency Versions and Build Properties -->
   <properties>
@@ -21,8 +21,11 @@
     <failOnMissingWebXml>false</failOnMissingWebXml> <!-- Important for modern setup -->
     <!-- Define versions for dependencies -->
     <jersey.version>3.1.5</jersey.version>
-    <jakarta.jakartaee-api.version>10.0.0</jakarta.jakartaee-api.version>
-    <jakarta.servlet.version>6.0.0</jakarta.servlet.version> <!-- Explicit Servlet version -->
+    <!-- Using specific API versions compatible with Jersey 3.1.x / Jakarta EE 10 -->
+    <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
+    <jakarta.inject-api.version>2.0.1</jakarta.inject-api.version>
+    <jakarta.cdi-api.version>4.0.1</jakarta.cdi-api.version>
+    <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
     <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
     <jaxb.runtime.version>4.0.4</jaxb.runtime.version>
     <junit.version>5.10.2</junit.version>
@@ -38,21 +41,47 @@
   </properties>
 
   <dependencies>
-    <!-- Jakarta EE Web Profile APIs (Servlet, JAX-RS, etc.) -->
-    <!-- Scope is 'provided' because the server (Tomcat) provides these -->
-    <dependency>
-      <groupId>jakarta.platform</groupId>
-      <artifactId>jakarta.jakartaee-web-api</artifactId>
-      <version>${jakarta.jakartaee-api.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Explicit Servlet API dependency (sometimes needed by plugins) -->
+    <!-- ############################################################# -->
+    <!-- ##          CORRECTION: Specific APIs Required             ## -->
+    <!-- ## Remove broad 'provided' API, include specific needed APIs ## -->
+    <!-- ############################################################# -->
+
+    <!-- Keep Servlet API provided (Tomcat provides this) -->
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
       <version>${jakarta.servlet.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <!-- JAX-RS API (needed for @Path, @GET etc.) - Compile Scope -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${jakarta.ws.rs-api.version}</version>
+      <!-- Default scope is compile - include in WAR -->
+    </dependency>
+
+    <!-- Dependency Injection API (needed for @Inject) - Compile Scope -->
+    <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+      <version>${jakarta.inject-api.version}</version>
+      <!-- Default scope is compile - include in WAR -->
+    </dependency>
+
+    <!-- CDI API (needed for @RequestScoped, @ApplicationScoped etc.) - Compile Scope -->
+    <dependency>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>${jakarta.cdi-api.version}</version>
+      <!-- Default scope is compile - include in WAR -->
+    </dependency>
+
+    <!-- ############################################################# -->
+    <!-- ##                  End of Correction                    ## -->
+    <!-- ############################################################# -->
+
 
     <!-- Jersey JAX-RS Implementation -->
     <dependency>
@@ -152,16 +181,16 @@
         <version>${maven-war-plugin.version}</version>
       </plugin>
       <!-- Tomcat 7 Maven Plugin - For running embedded during development -->
-<!--      <plugin>-->
-<!--        <groupId>org.apache.tomcat.maven</groupId>-->
-<!--        <artifactId>tomcat7-maven-plugin</artifactId>-->
-<!--        <version>${tomcat7-maven-plugin.version}</version>-->
-<!--        <configuration>-->
-<!--          <port>8080</port>-->
-<!--          <path>/uvhresolver</path>-->
-<!--          <uriEncoding>UTF-8</uriEncoding>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
+      <!--      <plugin>-->
+      <!--        <groupId>org.apache.tomcat.maven</groupId>-->
+      <!--        <artifactId>tomcat7-maven-plugin</artifactId>-->
+      <!--        <version>${tomcat7-maven-plugin.version}</version>-->
+      <!--        <configuration>-->
+      <!--          <port>8080</port>-->
+      <!--          <path>/uvhresolver</path>-->
+      <!--          <uriEncoding>UTF-8</uriEncoding>-->
+      <!--        </configuration>-->
+      <!--      </plugin>-->
     </plugins>
   </build>
 

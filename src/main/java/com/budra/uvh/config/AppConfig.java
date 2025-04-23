@@ -10,8 +10,8 @@ public class AppConfig extends ResourceConfig {
         // *** FIX: Scan ALL relevant packages for JAX-RS and DI annotations ***
         packages(
                 "com.budra.uvh.controllers.requestHandler", // Where RequestHandler (@Path) is
-                "com.budra.uvh.controllers.service",        // Where LskResolution (@RequestScoped) is
-                "com.budra.uvh.model.repository",         // Where LskCounterRepository (@ApplicationScoped) is
+                "com.budra.uvh.service",        // Where LskResolution (@RequestScoped) is
+                "com.budra.uvh.model ",         // Where LskCounterRepository (@ApplicationScoped) is
                 "com.budra.uvh.exception"                 // Scan for potential ExceptionMappers later if needed
         );
         System.out.println("JAX-RS (Jersey) Application Initialized - Scanning relevant packages.");

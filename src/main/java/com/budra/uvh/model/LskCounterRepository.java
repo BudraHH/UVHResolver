@@ -1,7 +1,6 @@
-package com.budra.uvh.model.repository;
+package com.budra.uvh.model;
 
 // Correct import for ConnectionManager based on your structure
-import com.budra.uvh.dbConfig.ConnectionManager;
 // Import standard Jakarta EE annotations for DI and scope
 import jakarta.enterprise.context.ApplicationScoped;
 // Import your custom exception
