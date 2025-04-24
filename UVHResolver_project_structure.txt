@@ -1,0 +1,53 @@
+UVHResolver/
+├── pom.xml                   # Maven Project Configuration
+├── .gitignore                # Git ignore file (add target/, .idea/, *.log, etc.)
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/           # Base package root
+│   │   │       └── zoho/      # Your company's package root
+│   │   │           └── uvh/     # Root package for this specific service
+│   │   │               ├── config/         # Application setup (JAX-RS App, DI)
+│   │   │               │   └── AppConfig.java
+│   │   │               ├── controller/     # Handles HTTP Requests (The 'C' in MVC)
+│   │   │               │   └── LskController.java       # Renamed from LskResource for clarity
+│   │   │               ├── exception/      # Custom Exceptions
+│   │   │               │   ├── LskGenerationException.java
+│   │   │               │   └── PlaceholderFormatException.java
+│   │   │               ├── git/            # Git integration logic (Future)
+│   │   │               │   └── GitHubService.java
+│   │   │               ├── model/          # Data & Business Logic (The 'M' in MVC)
+│   │   │               │   ├── db/         # Database infrastructure / Low-level access
+│   │   │               │   │   └── ConnectionManager.java # Supports Repository
+│   │   │               │   ├── repository/ # Data Access Objects / Repositories
+│   │   │               │   │   └── LskCounterRepository.java
+│   │   │               │   └── service/    # Business Logic Services
+│   │   │               │       └── LskResolutionService.java
+│   │   │               └── util/           # Shared Utilities
+│   │   │                   ├── PlaceholderInfo.java
+│   │   │                   └── XmlUtils.java
+│   │   ├── resources/
+│   │   │   ├── logback.xml                # Logging configuration
+│   │   │   └── uvh_config.properties      # Optional: Secure configuration
+│   │   └── webapp/
+│   │       └── WEB-INF/
+│   │           └── web.xml                  # Deployment Descriptor
+│   └── test/
+│       ├── java/
+│       │   └── com/
+│       │       └── zoho/
+│       │           └── uvh/                 # Mirror main structure for tests
+│       │               ├── controller/
+│       │               │   └── LskControllerTest.java
+│       │               └── model/
+│       │                   ├── repository/
+│       │                   │   └── LskCounterRepositoryTest.java
+│       │                   └── service/
+│       │                       └── LskResolutionServiceTest.java
+│       │               # (util tests omitted for brevity but should exist)
+│       └── resources/
+│           ├── test_db_config.properties # Test database configuration
+│           └── sample_placeholder.xml    # Sample XML for testing
+│           └── sample_resolved.xml       # Expected output for testing
+└── target/                     # Maven build output directory (ignored by Git)
+    └── UVHResolver.war           # The deployable web application archive
